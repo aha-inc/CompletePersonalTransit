@@ -3,7 +3,7 @@
 import { useTripStore } from "@/store/trip-store";
 
 export function TripSearch() {
-  const { setOrigin, setDestination } = useTripStore();
+  const { } = useTripStore();
 
   return (
     <div className="space-y-2" role="search" aria-label="Trip planning">

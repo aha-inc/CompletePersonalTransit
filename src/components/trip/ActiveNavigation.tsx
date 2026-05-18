@@ -6,7 +6,7 @@ import { MicroDelightBanner } from "@/components/ui/MicroDelightBanner";
 
 type Props = { tripPlanId: string };
 
-export function ActiveNavigation({ tripPlanId }: Props) {
+export function ActiveNavigation({ tripPlanId: _ }: Props) {
   const { activeItinerary, currentLegIndex, microDelightMessages, shownMessageIds, markMessageShown } = useNavStore();
 
   if (!activeItinerary) return null;

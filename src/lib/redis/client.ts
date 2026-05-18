@@ -1,13 +1,10 @@
 // Upstash Redis client — used for GTFS-RT caching and rate limiting (PF-02, SE-05)
+// TODO Sprint 3: install @upstash/redis and uncomment
+// import { Redis } from "@upstash/redis";
+// let client: InstanceType<typeof Redis> | null = null;
 
-let client: ReturnType<typeof import("@upstash/redis").Redis.fromEnv> | null = null;
-
-export function getRedis() {
-  if (!client) {
-    const { Redis } = require("@upstash/redis");
-    client = Redis.fromEnv();
-  }
-  return client!;
+export function getRedis(): never {
+  throw new Error("Redis not yet configured — install @upstash/redis in Sprint 3");
 }
 
 export const TTL = {

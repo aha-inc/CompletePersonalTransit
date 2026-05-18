@@ -2,8 +2,6 @@
 "use client";
 import { useTripStore } from "@/store/trip-store";
 import { ItineraryCard } from "./ItineraryCard";
-import { TransitFitCard } from "@/components/ui/TransitFitCard";
-
 export function TripResults() {
   const { itineraries, selectedItineraryId } = useTripStore();
 

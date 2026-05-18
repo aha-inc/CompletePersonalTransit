@@ -1,5 +1,5 @@
 // Sprint 6: Journey Progress Visualization (HX-05)
-import type { RankedItinerary, Leg } from "@/types/trip";
+import type { RankedItinerary } from "@/types/trip";
 
 type Props = {
   itinerary: RankedItinerary;

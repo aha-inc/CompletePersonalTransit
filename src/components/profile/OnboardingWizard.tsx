@@ -8,7 +8,6 @@ type Step = "accessibility" | "modes" | "preferences" | "done";
 
 export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState<Step>("accessibility");
-  const { setProfile } = useUserStore();
 
   return (
     <div className="space-y-6">
