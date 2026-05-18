@@ -11,7 +11,7 @@ export async function GET() {
   const statuses = (agencies ?? []).map((a) => ({
     agencyId: a.id,
     name: a.name,
-    lastIngestedAt: (a as Record<string, unknown>).updated_at ?? null,
+    lastIngestedAt: a.updated_at ?? null,
     isStale: false, // TODO Sprint 3: compare updated_at against expected refresh interval
     realtimeConnected: false,
   }));

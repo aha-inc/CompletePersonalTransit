@@ -51,6 +51,7 @@ export type AgencyRow = {
   gtfs_rt_url: string | null;
   gbfs_url: string | null;
   timezone: string;
+  updated_at: string;
 };
 
 export type TripPlanRow = {
