@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AccessibilityNeeds, NotificationPrefs } from "@/types/database";
+import type { TransitMode } from "@/types/transit";
 
 type UserStore = {
   userId: string | null;
   isGuest: boolean;
   accessibilityNeeds: AccessibilityNeeds;
-  preferredModes: string[];
+  preferredModes: TransitMode[];
   maxWalkMeters: number;
   fareBudget: number | null;
   notificationPrefs: NotificationPrefs;
