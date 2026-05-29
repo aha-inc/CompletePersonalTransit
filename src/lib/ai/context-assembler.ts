@@ -1,14 +1,8 @@
 // Sprint 5: AI pipeline step 2 — assemble structured context document (AI-01)
 import type { Itinerary } from "@/types/trip";
-import type { AccessibilityNeeds } from "@/types/database";
+import type { AccessibilityNeeds, PreferenceSignals } from "@/types/database";
 
-export type PreferenceSignals = {
-  preferredModes?: string[];
-  avoidedModes?: string[];
-  typicalDepartureHour?: number;
-  acceptedHighConfidenceCount?: number;
-  rejectedLowConfidenceCount?: number;
-};
+export type { PreferenceSignals };
 
 export type AssembledContext = {
   itineraries: Itinerary[];

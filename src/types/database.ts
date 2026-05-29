@@ -1,6 +1,10 @@
 // Manually maintained until Supabase project is linked.
 // Replace with: npx supabase gen types typescript --linked > src/types/database.ts
 
+import type { TransitMode } from "@/types/transit";
+import type { PreferenceSignals } from "@/lib/profile/preference-signals";
+export type { PreferenceSignals };
+
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
 export type AccessibilityNeeds = {
@@ -37,11 +41,14 @@ export type UserRow = {
 export type UserProfileRow = {
   user_id: string;
   accessibility_needs: AccessibilityNeeds;
-  preferred_modes: string[];
+  preferred_modes: TransitMode[];
   max_walk_meters: number;
   fare_budget: number | null;
   language_code: string;
   notification_prefs: NotificationPrefs;
+  preference_signals: PreferenceSignals;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AgencyRow = {

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isTransitMode } from "@/types/transit";
+import { parsePreferenceSignalsForWrite } from "@/lib/profile/preference-signals";
 
 export async function GET() {
   const db = await createClient();
@@ -28,6 +29,17 @@ export async function PATCH(req: NextRequest) {
     ) {
       return NextResponse.json(
         { error: "preferred_modes contains an invalid transit mode value." },
+        { status: 400 }
+      );
+    }
+  }
+
+  if (body.preference_signals !== undefined) {
+    try {
+      body.preference_signals = parsePreferenceSignalsForWrite(body.preference_signals);
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid preference_signals payload." },
         { status: 400 }
       );
     }
