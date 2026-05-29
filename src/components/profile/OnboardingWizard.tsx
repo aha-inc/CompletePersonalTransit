@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AccessibilityForm } from "./AccessibilityForm";
 import { useUserStore } from "@/store/user-store";
 import type { AccessibilityNeeds } from "@/types/database";
+import { TRANSIT_MODE_VALUES, type TransitMode } from "@/types/transit";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,29 +11,35 @@ type Step = "accessibility" | "modes" | "preferences";
 
 type WizardState = {
   accessibilityNeeds: AccessibilityNeeds;
-  preferredModes: string[];
+  preferredModes: TransitMode[];
   maxWalkMeters: number;
   fareBudget: number | null;
 };
 
 // ── Mode options ─────────────────────────────────────────────────────────────
 
-const MODE_OPTIONS: { value: string; label: string; icon: string }[] = [
-  { value: "BUS",     label: "Bus",        icon: "🚌" },
-  { value: "RAIL",    label: "Rail / Commuter train", icon: "🚆" },
-  { value: "SUBWAY",  label: "Subway / Metro", icon: "🚇" },
-  { value: "FERRY",   label: "Ferry",      icon: "⛴️" },
-  { value: "BICYCLE", label: "Bike-share", icon: "🚲" },
-  { value: "WALK",    label: "Walking",    icon: "🚶" },
+const MODE_OPTIONS: { value: TransitMode; label: string; icon: string }[] = [
+  { value: "BUS",     label: "Bus",                    icon: "🚌" },
+  { value: "RAIL",    label: "Rail / Commuter train",  icon: "🚆" },
+  { value: "SUBWAY",  label: "Subway / Metro",         icon: "🚇" },
+  { value: "FERRY",   label: "Ferry",                  icon: "⛴️" },
+  { value: "BICYCLE", label: "Bike-share",             icon: "🚲" },
+  { value: "WALK",    label: "Walking",                icon: "🚶" },
 ];
+
+// Ensure MODE_OPTIONS covers every TransitMode (compile-time exhaustiveness check)
+const _modeCheck: TransitMode[] = TRANSIT_MODE_VALUES.map(
+  (v) => MODE_OPTIONS.find((o) => o.value === v)!.value
+);
+void _modeCheck;
 
 // ── Walk distance options ────────────────────────────────────────────────────
 
 const WALK_OPTIONS: { label: string; sublabel: string; meters: number }[] = [
-  { label: "Short",       sublabel: "~5 min / 400 m",  meters: 400  },
-  { label: "Moderate",    sublabel: "~10 min / 800 m", meters: 800  },
-  { label: "Long",        sublabel: "~20 min / 1.6 km", meters: 1600 },
-  { label: "No limit",    sublabel: "I don&apos;t mind walking", meters: 3200 },
+  { label: "Short",    sublabel: "~5 min / 400 m",         meters: 400  },
+  { label: "Moderate", sublabel: "~10 min / 800 m",        meters: 800  },
+  { label: "Long",     sublabel: "~20 min / 1.6 km",       meters: 1600 },
+  { label: "No limit", sublabel: "I don&apos;t mind walking", meters: 3200 },
 ];
 
 // ── Step progress bar ────────────────────────────────────────────────────────
@@ -50,8 +57,8 @@ function ProgressBar({ current }: { current: Step }) {
     <nav aria-label="Onboarding steps">
       <ol className="flex items-center gap-0">
         {STEPS.map((step, i) => {
-          const done    = i < currentIdx;
-          const active  = i === currentIdx;
+          const done   = i < currentIdx;
+          const active = i === currentIdx;
           return (
             <li key={step} className="flex items-center flex-1 last:flex-none">
               <div className="flex flex-col items-center gap-1">
@@ -87,15 +94,15 @@ function ModesForm({
   onNext,
   onBack,
 }: {
-  selected: string[];
-  onNext: (modes: string[]) => void;
+  selected: TransitMode[];
+  onNext: (modes: TransitMode[]) => void;
   onBack: () => void;
 }) {
-  const [modes, setModes] = useState<string[]>(
+  const [modes, setModes] = useState<TransitMode[]>(
     selected.length > 0 ? selected : ["BUS", "RAIL", "WALK"]
   );
 
-  const toggle = (value: string) =>
+  const toggle = (value: TransitMode) =>
     setModes((prev) =>
       prev.includes(value) ? prev.filter((m) => m !== value) : [...prev, value]
     );
@@ -114,7 +121,7 @@ function ModesForm({
           return (
             <label
               key={value}
-              className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors ${
+              className={`flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 ${
                 checked ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
               }`}
             >
@@ -159,6 +166,9 @@ function ModesForm({
 
 // ── Step 3: Walk distance + fare budget ──────────────────────────────────────
 
+const FARE_HINT_ID  = "fare-budget-hint";
+const FARE_ERROR_ID = "fare-budget-error";
+
 function PreferencesForm({
   maxWalkMeters,
   fareBudget,
@@ -194,7 +204,7 @@ function PreferencesForm({
           {WALK_OPTIONS.map(({ label, sublabel, meters }) => (
             <label
               key={meters}
-              className={`flex flex-col rounded-xl border p-3 cursor-pointer transition-colors ${
+              className={`flex flex-col rounded-xl border p-3 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 ${
                 walk === meters ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
               }`}
             >
@@ -230,17 +240,20 @@ function PreferencesForm({
             placeholder="e.g. 5.00"
             value={fare}
             onChange={(e) => setFare(e.target.value)}
+            aria-invalid={!fareValid}
+            aria-describedby={fareValid ? FARE_HINT_ID : `${FARE_HINT_ID} ${FARE_ERROR_ID}`}
             className={`w-full pl-7 pr-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               fareValid ? "border-gray-300" : "border-red-400"
             }`}
-            aria-describedby="fare-budget-hint"
           />
         </div>
-        <p id="fare-budget-hint" className="text-xs text-gray-400">
+        <p id={FARE_HINT_ID} className="text-xs text-gray-400">
           We&apos;ll flag routes that exceed this amount.
         </p>
         {!fareValid && (
-          <p className="text-xs text-red-500" role="alert">Please enter a valid dollar amount.</p>
+          <p id={FARE_ERROR_ID} className="text-xs text-red-500" role="alert">
+            Please enter a valid dollar amount.
+          </p>
         )}
       </div>
 
@@ -274,7 +287,6 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Accumulate data across steps; committed to store + API on final step
   const [draft, setDraft] = useState<WizardState>({
     accessibilityNeeds: store.accessibilityNeeds,
     preferredModes:     store.preferredModes,
@@ -287,7 +299,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
     setStep("modes");
   };
 
-  const handleModesNext = (modes: string[]) => {
+  const handleModesNext = (modes: TransitMode[]) => {
     setDraft((d) => ({ ...d, preferredModes: modes }));
     setStep("preferences");
   };
@@ -295,7 +307,6 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
   const handlePreferencesComplete = async (maxWalk: number, fare: number | null) => {
     const final: WizardState = { ...draft, maxWalkMeters: maxWalk, fareBudget: fare };
 
-    // Update local store immediately so guest mode works (UP-04)
     store.setProfile({
       accessibilityNeeds: final.accessibilityNeeds,
       preferredModes:     final.preferredModes,
@@ -303,30 +314,35 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
       fareBudget:         final.fareBudget,
     });
 
-    // Persist to Supabase if the user is authenticated
-    if (!store.isGuest) {
-      setSaving(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/profile", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accessibility_needs: final.accessibilityNeeds,
-            preferred_modes:     final.preferredModes,
-            max_walk_meters:     final.maxWalkMeters,
-            fare_budget:         final.fareBudget,
-          }),
-        });
-        if (!res.ok) throw new Error("Failed to save profile");
-      } catch {
-        setError("Couldn’t save your preferences — you can update them later in your profile.");
-      } finally {
-        setSaving(false);
-      }
+    if (store.isGuest) {
+      onComplete();
+      return;
     }
 
-    onComplete();
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessibility_needs: final.accessibilityNeeds,
+          preferred_modes:     final.preferredModes,
+          max_walk_meters:     final.maxWalkMeters,
+          fare_budget:         final.fareBudget,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save profile");
+      onComplete();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Couldn't save your preferences — you can update them later in your profile."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

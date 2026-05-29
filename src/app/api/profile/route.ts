@@ -1,6 +1,7 @@
 // Sprint 2: User profile API — read and update (UP-02, HX-09)
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isTransitMode } from "@/types/transit";
 
 export async function GET() {
   const db = await createClient();
@@ -19,6 +20,19 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
+
+  if (body.preferred_modes !== undefined) {
+    if (
+      !Array.isArray(body.preferred_modes) ||
+      !body.preferred_modes.every(isTransitMode)
+    ) {
+      return NextResponse.json(
+        { error: "preferred_modes contains an invalid transit mode value." },
+        { status: 400 }
+      );
+    }
+  }
+
   const { data, error } = await db
     .from("user_profiles")
     .upsert({ user_id: user.id, ...body })
