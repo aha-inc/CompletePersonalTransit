@@ -2,7 +2,7 @@
 // Replace with: npx supabase gen types typescript --linked > src/types/database.ts
 
 import type { TransitMode } from "@/types/transit";
-import type { PreferenceSignals } from "@/lib/profile/preference-signals";
+import type { PreferenceSignals } from "@/types/preference-signals";
 export type { PreferenceSignals };
 
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
@@ -46,7 +46,7 @@ export type UserProfileRow = {
   fare_budget: number | null;
   language_code: string;
   notification_prefs: NotificationPrefs;
-  preference_signals: PreferenceSignals;
+  preference_signals: unknown;    // raw jsonb — normalize before use (see lib/profile/user-profile.ts)
   created_at: string;
   updated_at: string;
 };
